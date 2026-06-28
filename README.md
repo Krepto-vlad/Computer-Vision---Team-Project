@@ -1,61 +1,86 @@
 # Low-Light Enhancement & Detection
 
-Классический CV-пайплайн для тёмных изображений:
+Classical **OpenCV** pipeline for dark images:
 
-**Enhancement → Segmentation → Morphology → Detection → Decision**
+**Enhance → Segment → Clean → Detect → Decide**
 
-Проект опирается на лабораторные работы по сегментации (Lab 07) и детекции признаков (Lab 08).
+After low-light enhancement, the system detects **salient regions** (bounding boxes) and outputs an automatic scene decision (`OK` / `ALERT` / `NO_OBJECTS`).
 
-## Структура проекта
+---
 
-```
-TEAMproject/
-├── data/                    # датасет (LOL или синтетика), не в git
-├── outputs/                 # отчёты, CSV, визуализации
-├── notebooks/               # Jupyter-ноутбуки
-├── scripts/                 # CLI-скрипты
-└── src/lowlight_cv/         # основной Python-пакет
-    ├── config.py            # пути и константы
-    ├── data/                # загрузка LOL, синтетические сцены
-    ├── enhancement/         # gamma, CLAHE, Retinex, …
-    ├── segmentation/        # пороги, watershed, GrabCut
-    ├── morphology/          # opening/closing, clean_mask
-    ├── detection/           # Harris, ORB, bounding boxes
-    ├── metrics/             # PSNR, SSIM, no-reference метрики
-    ├── decision/            # решение о сцене
-    ├── pipeline/            # LowLightPipeline
-    └── utils/               # визуализация
-```
-
-## Установка
+## Setup (once)
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate        # Windows
-pip install -r requirements.txt
-pip install -e .
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # Linux / macOS
+pip install -e ".[dev]"
 ```
 
-## Быстрый старт
+---
+
+## Run in one line
+
+Batch demo on real LOL images — saves all 6 required outputs per image:
 
 ```bash
-python scripts/run_demo.py
+python scripts/run_showcase.py --n 6
 ```
 
-Или в коде:
+Results: `outputs/showcase/` (PNG per stage, `summary.csv`, `demo_montage.png`, `PRESENTATION.md`).
+
+Optional GT metrics on synthetic data (experiments only):
+
+```bash
+python scripts/run_eval.py --synthetic --n 12
+```
+
+---
+
+## Run via notebook (presentation / Colab-style)
+
+**Local Jupyter:**
+
+```bash
+jupyter notebook
+```
+
+Open `notebooks/presentation_demo.ipynb` → **Kernel → Restart & Run All**.
+
+**Google Colab:**
 
 ```python
-from lowlight_cv.pipeline import LowLightPipeline
-
-pipe = LowLightPipeline(enhance="auto", segment="otsu")
-result = pipe.process(image_bgr)
-pipe.visualize(result)
+!git clone <your-repo-url> TEAMproject
+%cd TEAMproject
+!pip install -e ".[dev]"
 ```
 
-## Датасет
+Then open `notebooks/presentation_demo.ipynb` and **Run All**.
 
-По умолчанию скрипт пытается скачать **LOL** (paired low/normal). Если загрузка недоступна — генерируется синтетический набор с GT-масками.
+| Step | Content |
+|------|---------|
+| 0 | Setup, imports |
+| 1 | LOL dataset (input vs reference) |
+| 2 | Enhancement methods |
+| 3 | Full 5-stage pipeline + strip |
+| 4 | Batch run, save to `outputs/showcase/` |
+| 5 | Feature detectors (optional, Lab 08) |
 
-## Основной ноутбук
 
-Полный интерактивный пайплайн с отчётом и презентацией: `lowlight_enhancement_detection.ipynb`.
+---
+
+## Project structure
+
+```
+TEAMproject/
+├── notebooks/presentation_demo.ipynb   # demo 
+├── scripts/
+│   ├── run_showcase.py                 # one-line batch demo
+│   └── run_eval.py                     # GT metrics (synthetic)
+├── src/lowlight_cv/                    # pipeline code
+├── data/custom/                        # custom low-light photos
+└── outputs/showcase/                   # generated results
+```
+
+
+Team roles: `docs/CONTRIBUTION_TEMPLATE.md`
