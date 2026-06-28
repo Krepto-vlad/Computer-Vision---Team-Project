@@ -13,7 +13,7 @@ def gamma_correction(img, gamma=0.5):
 def adaptive_gamma(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     mean = gray.mean() / 255.0
-    gamma = float(np.clip(math.log(0.5) / math.log(mean + 1e-6), 0.35, 1.0))
+    gamma = float(np.clip(-math.log2(mean + 1e-6), 1.0, 3.5))
     return gamma_correction(img, gamma)
 
 
@@ -71,12 +71,24 @@ def msrcr(img, sigmas=(15, 80, 250), alpha=125.0, beta=46.0):
     return out
 
 
+def nlm_denoise(img, h=10, template_ws=7, search_ws=21):
+    denoised = cv2.fastNlMeansDenoisingColored(img, None, h, h, template_ws, search_ws)
+    return clahe_enhance(denoised)
+
+
+def bilateral_denoise(img, d=9, sigma_color=75, sigma_space=75):
+    denoised = cv2.bilateralFilter(img, d, sigma_color, sigma_space)
+    return clahe_enhance(denoised)
+
+
 ENHANCERS = {
-    "gamma": lambda x: gamma_correction(x, 0.45),
+    "gamma": lambda x: gamma_correction(x, 2.2),
     "adaptive_gamma": adaptive_gamma,
     "hist_eq": hist_equalization,
     "clahe": clahe_enhance,
     "ssr": single_scale_retinex,
     "msr": multi_scale_retinex,
     "msrcr": msrcr,
+    "nlm_denoise": nlm_denoise,
+    "bilateral": bilateral_denoise,
 }
