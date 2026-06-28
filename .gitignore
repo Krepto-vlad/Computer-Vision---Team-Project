@@ -16,6 +16,14 @@ env/
 # Data & outputs (keep structure, ignore contents)
 data/*
 !data/.gitkeep
+!data/custom/
+!data/custom/.gitkeep
+!data/custom/README.md
+
+# Generated synthetic files in data/ root
+data/low_*.png
+data/high_*.png
+data/mask_*.png
 outputs/*
 !outputs/.gitkeep
 
